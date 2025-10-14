@@ -12,19 +12,19 @@ var app = (function () {
 
     function changeMusicIcon(button, icon) {
         button.addEventListener('change', function () {
+            const buttonState = {
+                State: button.checked ? 'on' : 'off',
+                Time: new Date().toISOString()
+            };
             if (button.checked) {
                 icon.className = 'fa-solid fa-music';
                 icon.style.color = 'blue';
-                localStorage.setItem('musicButton', 'on');
-                localStorage.setItem('TimeButtonChangeMusic', new Date().toISOString());
-                document.getElementById('TimeLivingRoomMusic').textContent = localStorage.getItem('TimeButtonChangeMusic');
             } else {
                 icon.className = 'fa-solid fa-volume-xmark';
                 icon.style.color = 'red';
-                localStorage.setItem('musicButton', 'off');
-                localStorage.setItem('TimeButtonChangeMusic', new Date().toISOString());
-                document.getElementById('TimeLivingRoomMusic').textContent = localStorage.getItem('TimeButtonChangeMusic');
             }
+            localStorage.setItem('musicButton', JSON.stringify(buttonState));
+            document.getElementById('TimeLivingRoomMusic').textContent = buttonState.Time;
         });
     }
 
@@ -32,17 +32,14 @@ var app = (function () {
 
     function toggleLight(button, icon) {
         button.addEventListener('change', function () {
-            if (button.checked) {
-                icon.style.color = 'yellow';
-                localStorage.setItem(button.id, 'on');
-                localStorage.setItem('Time' + button.id, new Date().toISOString());
-                document.getElementById('Time' + button.id).textContent = localStorage.getItem('Time' + button.id);
-            } else {
-                icon.style.color = 'black';
-                localStorage.setItem(button.id, 'off');
-                localStorage.setItem('Time' + button.id, new Date().toISOString());
-                document.getElementById('Time' + button.id).textContent = localStorage.getItem('Time' + button.id);
-            }
+            const buttonState = {
+                State: button.checked ? 'on' : 'off',
+                Time: new Date().toISOString()
+            };
+            
+            icon.style.color = button.checked ? 'yellow' : 'black';
+            localStorage.setItem(button.id, JSON.stringify(buttonState));
+            document.getElementById('Time' + button.id).textContent = buttonState.Time;
         });
     }
 
@@ -61,7 +58,23 @@ var app = (function () {
             dateElement.textContent = formattedDate;
         }
 
-        // Restore light states from localStorage
+        // Restore music button state
+        const savedMusicState = localStorage.getItem('musicButton');
+        if (savedMusicState) {
+            const musicState = JSON.parse(savedMusicState);
+            if (musicState.State === 'on') {
+                musicButton.checked = true;
+                musicIcon.className = 'fa-solid fa-music';
+                musicIcon.style.color = 'blue';
+            } else {
+                musicButton.checked = false;
+                musicIcon.className = 'fa-solid fa-volume-xmark';
+                musicIcon.style.color = 'red';
+            }
+            document.getElementById('TimeLivingRoomMusic').textContent = musicState.Time;
+        }
+
+        // Restore light states
         const buttons = [
             { button: btnLightKitchen, icon: iconLightKitchen },
             { button: btnCeilingLightLivingRoom, icon: iconCeilingLightLivingRoom },
@@ -70,39 +83,13 @@ var app = (function () {
 
         buttons.forEach(({button, icon}) => {
             const savedState = localStorage.getItem(button.id);
-            if (savedState === 'on') {
-                button.checked = true;
-                icon.style.color = 'yellow';
-            } else if (savedState === 'off') {
-                button.checked = false;
-                icon.style.color = 'black';
-            }
-            // Display last change time if available
-            const timeElement = document.getElementById('Time' + button.id);
-            const savedTime = localStorage.getItem('Time' + button.id);
-            if (timeElement && savedTime) {
-                timeElement.textContent = savedTime;
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                button.checked = state.State === 'on';
+                icon.style.color = state.State === 'on' ? 'yellow' : 'black';
+                document.getElementById('Time' + button.id).textContent = state.Time;
             }
         });
-        
-        // Restore music state from localStorage
-        const timeMusicElement = document.getElementById('TimeButtonChangeMusic');
-        const savedMusicTime = localStorage.getItem('TimeButtonChangeMusic');
-        const savedMusicState = localStorage.getItem('musicButton');
-        if (savedMusicState === 'on') {
-            musicButton.checked = true;
-            musicIcon.className = 'fa-solid fa-music';
-            musicIcon.style.color = 'blue';
-        } else if (savedMusicState === 'off') {
-            musicButton.checked = false;
-            musicIcon.className = 'fa-solid fa-volume-xmark';
-            musicIcon.style.color = 'red';
-        }
-
-        // Display last change time if available
-        if (timeMusicElement && savedMusicTime) {
-            timeMusicElement.textContent = savedMusicTime;
-        }
     });
 
     var updateClock = function () {
