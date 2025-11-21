@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart City - Leiria Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/0852da1580.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script type="module" src="js/index.js"></script>
+
+
+    <style>
+        :root {
+            --primary: #3337fa;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #f56565;
+            --info: #4299e1;
+            --dark: #1a202c;
+            --light: #f7fafc;
+        }
+
+        body {
+            background: linear-gradient(135deg, #718a9b 0%, #91989b 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .city-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .zone-card {
+            position: relative;
+            overflow: visible;
+            height: auto !important;
+            min-height: auto;
+        }
+
+        .zone-card.glass-card {
+            height: auto !important;
+        }
+
+        .zone-header {
+            background: linear-gradient(135deg, #718a9b 0%, #91989b 100%);
+            color: black;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            margin: -25px -25px 20px -25px;
+        }
+
+        .zone-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sensor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--light);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .sensor-item:hover {
+            background: #e2e8f0;
+            transform: translateX(5px);
+        }
+
+        .sensor-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .sensor-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .actuator-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .actuator-btn.active {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .actuator-btn.inactive {
+            background: #e2e8f0;
+            color: #718096;
+        }
+
+        .actuator-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .alert-banner {
+            background: linear-gradient(135deg, var(--warning), var(--danger));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .weather-widget {
+            background: linear-gradient(135deg, #4299e1, #667eea);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .weather-temp {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .nav-tabs {
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            margin-right: 10px;
+            border-radius: 10px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: blink 2s infinite;
+        }
+
+        .status-online {
+            background: var(--success);
+        }
+
+        .status-warning {
+            background: var(--warning);
+        }
+
+        .status-offline {
+            background: var(--danger);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .progress-custom {
+            height: 10px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .badge-custom {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
+        integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y"
+        crossorigin="anonymous"></script>
+
+    <div class="main-container">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#rules">
+                    <i class="bi bi-gear"></i> Regras
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#management">
+                    <i class="bi bi-tools"></i> Gestão
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-pane fade show active">
+
+                <!-- Header -->
+                <div class="header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="city-title">
+                                <i class="bi bi-buildings"></i> Smart City Leiria
+                            </h1>
+                            <p class="text-muted mb-0">
+                                <span class="status-indicator status-online"></span>
+                                Sistema Operacional | Última atualização: <span id="lastUpdate">--:--</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="weather-widget">
+                                <div class="weather-icon"></div>
+                                <div class="weather-temp" id="curTemperature"></div>
+                                <div id="weatherDescription"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon" style="color: var(--info);">
+                                <i class="bi bi-thermometer-half"></i>
+                            </div>
+                            <div class="stat-value" style="color: var(--info);" id="avgTemp">22.5°C</div>
+                            <div class="stat-label">Temperatura Média</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon" style="color: var(--success);">
+                                <i class="bi bi-droplet-half"></i>
+                            </div>
+                            <div class="stat-value" style="color: var(--success);" id="avgHumidity">68%</div>
+                            <div class="stat-label">Humidade Média</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon" style="color: var(--warning);">
+                                <i class="bi bi-lightbulb"></i>
+                            </div>
+                            <div class="stat-value" style="color: var(--warning);" id="lightsOn">156</div>
+                            <div class="stat-label">Luzes Ativas</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon" style="color: var(--danger);">
+                                <i class="bi bi-broadcast"></i>
+                            </div>
+                            <div class="stat-value" style="color: var(--danger);" id="activeSensors">16</div>
+                            <div class="stat-label">Dispositivos Ativos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zones -->
+                <div class="row g-4">
+                    <!-- Centro Histórico -->
+                    <div class="col-lg-6">
+                        <div class="glass-card zone-card">
+                            <div class="zone-header">
+                                <h3 class="zone-title">
+                                    <i class="bi bi-building"></i> Centro Histórico
+                                </h3>
+                            </div>
+
+                            <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    Temperatura
+                                </span>
+                                <span class="sensor-value" style="color: var(--info);">21.3°C</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-droplet" style="color: var(--primary);"></i>
+                                    Humidade
+                                </span>
+                                <span class="sensor-value" style="color: var(--primary);">68%</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    Luminosidade
+                                </span>
+                                <span class="sensor-value" style="color: var(--warning);">230 lux</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-volume-up" style="color: var(--danger);"></i>
+                                    Ruído
+                                </span>
+                                <span class="sensor-value" style="color: var(--danger);">65 dB</span>
+                            </div>
+
+                            <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    Iluminação Pública
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Ligado
+                                </button>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-camera-video"></i>
+                                    Câmaras de Segurança
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Ligado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parque Verde -->
+                    <div class="col-lg-6">
+                        <div class="glass-card zone-card">
+                            <div class="zone-header" style="background: linear-gradient(135deg, #48bb78, #38a169);">
+                                <h3 class="zone-title">
+                                    <i class="bi bi-tree"></i> Parque Verde
+                                </h3>
+                            </div>
+                            
+                            <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    Temperatura
+                                </span>
+                                <span class="sensor-value" style="color: var(--info);">23.8°C</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-moisture" style="color: var(--success);"></i>
+                                    Humidade do Solo
+                                </span>
+                                <span class="sensor-value" style="color: var(--success);">45%</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    Luminosidade
+                                </span>
+                                <span class="sensor-value" style="color: var(--warning);">850 lux</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-wind" style="color: var(--info);"></i>
+                                    Qualidade do Ar
+                                </span>
+                                <span class="sensor-value" style="color: var(--success);">Excelente</span>
+                            </div>
+
+                            <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-droplet-fill"></i>
+                                    Sistema de Rega
+                                </span>
+                                <button class="actuator-btn inactive" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-off"></i> Desligado
+                                </button>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    Iluminação do Parque
+                                </span>
+                                <button class="actuator-btn inactive" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-off"></i> Desligado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zona Industrial -->
+                    <div class="col-lg-6">
+                        <div class="glass-card zone-card">
+                            <div class="zone-header" style="background: linear-gradient(135deg, #ed8936, #dd6b20);">
+                                <h3 class="zone-title">
+                                    <i class="bi bi-gear-fill"></i> Zona Industrial
+                                </h3>
+                            </div>
+                            
+                            <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    Temperatura
+                                </span>
+                                <span class="sensor-value" style="color: var(--info);">24.1°C</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-cloud-fog2" style="color: var(--warning);"></i>
+                                    CO2
+                                </span>
+                                <span class="sensor-value" style="color: var(--warning);">450 ppm</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-wind" style="color: var(--danger);"></i>
+                                    Qualidade do Ar
+                                </span>
+                                <span class="sensor-value" style="color: var(--warning);">Moderada</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-volume-up" style="color: var(--danger);"></i>
+                                    Ruído
+                                </span>
+                                <span class="sensor-value" style="color: var(--danger);">78 dB</span>
+                            </div>
+
+                            <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-fan"></i>
+                                    Sistema de Ventilação
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Ativo
+                                </button>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Alertas de Poluição
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Ativo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zona Residencial -->
+                    <div class="col-lg-6">
+                        <div class="glass-card zone-card">
+                            <div class="zone-header" style="background: linear-gradient(135deg, #4299e1, #3182ce);">
+                                <h3 class="zone-title">
+                                    <i class="bi bi-house-fill"></i> Zona Residencial
+                                </h3>
+                            </div>
+                            
+                            <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    Temperatura
+                                </span>
+                                <span class="sensor-value" style="color: var(--info);">22.0°C</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-droplet" style="color: var(--primary);"></i>
+                                    Humidade
+                                </span>
+                                <span class="sensor-value" style="color: var(--primary);">65%</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    Luminosidade
+                                </span>
+                                <span class="sensor-value" style="color: var(--warning);">180 lux</span>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-wind" style="color: var(--success);"></i>
+                                    Qualidade do Ar
+                                </span>
+                                <span class="sensor-value" style="color: var(--success);">Boa</span>
+                            </div>
+
+                            <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    Iluminação de Rua
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Ligado
+                                </button>
+                            </div>
+                            <div class="sensor-item">
+                                <span class="sensor-name">
+                                    <i class="bi bi-stoplights"></i>
+                                    Controlo de Tráfego
+                                </span>
+                                <button class="actuator-btn active" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-on"></i> Normal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rules Tab -->
+            <div id="rules" class="tab-pane fade">
+                <div class="glass-card">
+                    <h3 class="mb-4"><i class="bi bi-gear-fill"></i> Regras de Automação</h3>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="glass-card" style="background: rgba(102, 126, 234, 0.1);">
+                                <h5><i class="bi bi-lightbulb"></i> Iluminação Inteligente</h5>
+                                <p class="text-muted mb-3">Ativar iluminação quando a luminosidade é baixa</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Luminosidade Mínima (lux)</label>
+                                    <input type="range" class="form-range" min="0" max="1000" value="300" id="lightThreshold">
+                                    <span class="badge-custom bg-primary">300 lux</span>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="rule1" checked>
+                                    <label class="form-check-label" for="rule1">Regra Ativa</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="glass-card" style="background: rgba(72, 187, 120, 0.1);">
+                                <h5><i class="bi bi-droplet-fill"></i> Rega Automática</h5>
+                                <p class="text-muted mb-3">Ativar rega quando humidade do solo é baixa</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Humidade Mínima (%)</label>
+                                    <input type="range" class="form-range" min="0" max="100" value="30">
+                                    <span class="badge-custom bg-success">30%</span>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="rule2" checked>
+                                    <label class="form-check-label" for="rule2">Regra Ativa</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="glass-card" style="background: rgba(237, 137, 54, 0.1);">
+                                <h5><i class="bi bi-exclamation-triangle"></i> Alerta de Qualidade do Ar</h5>
+                                <p class="text-muted mb-3">Gerar alerta quando qualidade do ar é má</p>
+                                <div class="mb-3">
+                                    <label class="form-label">AQI Máximo</label>
+                                    <input type="range" class="form-range" min="0" max="500" value="150">
+                                    <span class="badge-custom bg-warning">150</span>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="rule3" checked>
+                                    <label class="form-check-label" for="rule3">Regra Ativa</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="glass-card" style="background: rgba(245, 101, 101, 0.1);">
+                                <h5><i class="bi bi-volume-up-fill"></i> Controlo de Ruído</h5>
+                                <p class="text-muted mb-3">Ajustar semáforos quando ruído é elevado</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Nível Máximo de Ruído (dB)</label>
+                                    <input type="range" class="form-range" min="0" max="120" value="80">
+                                    <span class="badge-custom bg-danger">80 dB</span>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="rule4">
+                                    <label class="form-check-label" for="rule4">Regra Ativa</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Tab -->
+            <div id="management" class="tab-pane fade">
+                <div class="glass-card">
+                    <h3 class="mb-4"><i class="bi bi-tools"></i> Gestão de Sensores e Atuadores</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5>Adicionar Sensor</h5>
+                            <select class="form-select mb-2" id="sensorZoneSelect">
+                                <option>Selecionar Zona</option>
+                                <option>Centro Histórico</option>
+                                <option>Parque Verde</option>
+                                <option>Zona Industrial</option>
+                                <option>Zona Residencial</option>
+                            </select>
+                            <select class="form-select mb-2" id="sensorTypeSelect">
+                                <option>Tipo de Sensor</option>
+                                <option>Temperatura</option>
+                                <option>Humidade</option>
+                                <option>Luminosidade</option>
+                                <option>Qualidade do Ar</option>
+                                <option>Ruído</option>
+                                <option>Humidade do Solo</option>
+                            </select>
+                            <button class="btn btn-primary w-100" id="addSensorBtn">
+                                <i class="bi bi-plus-circle"></i> Adicionar Sensor
+                            </button>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <h5>Adicionar Atuador</h5>
+                            <select class="form-select mb-2" id="actuatorZoneSelect">
+                                <option>Selecionar Zona</option>
+                                <option>Centro Histórico</option>
+                                <option>Parque Verde</option>
+                                <option>Zona Industrial</option>
+                                <option>Zona Residencial</option>
+                            </select>
+                            <select class="form-select mb-2" id="actuatorTypeSelect">
+                                <option>Tipo de Atuador</option>
+                                <option>Iluminação Pública</option>
+                                <option>Sistema de Rega</option>
+                                <option>Câmaras de Segurança</option>
+                                <option>Ventilação</option>
+                                <option>Sistema de Alerta</option>
+                            </select>
+                            <button class="btn btn-success w-100" id="addActuatorBtn">
+                                <i class="bi bi-plus-circle"></i> Adicionar Atuador
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Dispositivos Ativos</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Zona</th>
+                                    <th>Dispositivo</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceTableBody">
+                                <!-- Devices will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+</body>
