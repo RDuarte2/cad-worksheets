@@ -306,6 +306,48 @@
             font-weight: 600;
             font-size: 0.85rem;
         }
+
+        /* Alert Styles */
+        .alert-notification {
+            animation: slideInDown 0.5s ease-out;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .alert-notification.alert-danger {
+            border-left-color: var(--danger);
+            background: rgba(245, 101, 101, 0.15);
+        }
+
+        .alert-notification.alert-warning {
+            border-left-color: var(--warning);
+            background: rgba(237, 137, 54, 0.15);
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .alert-notification i {
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 
@@ -353,7 +395,7 @@
                             </h1>
                             <p class="text-muted mb-0">
                                 <span class="status-indicator status-online"></span>
-                                Sistema Operacional | Última atualização: <span id="lastUpdate">--:--</span>
+                                <span id="systemStatus">Sistema Operacional</span> | Última atualização: <span id="lastUpdate">--:--</span>
                             </p>
                         </div>
                         <div class="col-md-4">
@@ -365,6 +407,9 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Alerts Container -->
+                <div id="alertsContainer" class="mb-4"></div>
 
                 <!-- Stats Overview -->
                 <div class="row g-4 mb-4">
@@ -420,31 +465,31 @@
                             <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    <i class="bi bi-thermometer text-danger"></i>
                                     Temperatura
                                 </span>
-                                <span class="sensor-value" style="color: var(--info);">21.3°C</span>
+                                <span class="sensor-value">21.3°C</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-droplet" style="color: var(--primary);"></i>
+                                    <i class="bi bi-droplet text-info"></i>
                                     Humidade
                                 </span>
-                                <span class="sensor-value" style="color: var(--primary);">68%</span>
+                                <span class="sensor-value">68%</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    <i class="bi bi-brightness-high text-warning"></i>
                                     Luminosidade
                                 </span>
-                                <span class="sensor-value" style="color: var(--warning);">230 lux</span>
+                                <span class="sensor-value">230 lux</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-volume-up" style="color: var(--danger);"></i>
+                                    <i class="bi bi-volume-up text-dark"></i>
                                     Ruído
                                 </span>
-                                <span class="sensor-value" style="color: var(--danger);">65 dB</span>
+                                <span class="sensor-value">65 dB</span>
                             </div>
 
                             <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
@@ -459,7 +504,7 @@
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-camera-video"></i>
+                                    <i class="bi bi-camera-video text-secondary"></i>
                                     Câmaras de Segurança
                                 </span>
                                 <button class="actuator-btn active" onclick="toggleActuator(this)">
@@ -481,37 +526,37 @@
                             <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    <i class="bi bi-thermometer text-danger"></i>
                                     Temperatura
                                 </span>
-                                <span class="sensor-value" style="color: var(--info);">23.8°C</span>
+                                <span class="sensor-value">23.8°C</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-moisture" style="color: var(--success);"></i>
+                                    <i class="bi bi-moisture text-info"></i>
                                     Humidade do Solo
                                 </span>
-                                <span class="sensor-value" style="color: var(--success);">45%</span>
+                                <span class="sensor-value">45%</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    <i class="bi bi-brightness-high text-warning"></i>
                                     Luminosidade
                                 </span>
-                                <span class="sensor-value" style="color: var(--warning);">850 lux</span>
+                                <span class="sensor-value">850 lux</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-wind" style="color: var(--info);"></i>
+                                    <i class="bi bi-wind text-success"></i>
                                     Qualidade do Ar
                                 </span>
-                                <span class="sensor-value" style="color: var(--success);">Excelente</span>
+                                <span class="sensor-value">Excelente</span>
                             </div>
 
                             <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-droplet-fill"></i>
+                                    <i class="bi bi-droplet-fill text-info"></i>
                                     Sistema de Rega
                                 </span>
                                 <button class="actuator-btn inactive" onclick="toggleActuator(this)">
@@ -520,8 +565,8 @@
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-lightbulb-fill"></i>
-                                    Iluminação do Parque
+                                    <i class="bi bi-lightbulb-fill text-warning"></i>
+                                    Iluminação Pública
                                 </span>
                                 <button class="actuator-btn inactive" onclick="toggleActuator(this)">
                                     <i class="bi bi-toggle-off"></i> Desligado
@@ -542,50 +587,50 @@
                             <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    <i class="bi bi-thermometer text-danger"></i>
                                     Temperatura
                                 </span>
-                                <span class="sensor-value" style="color: var(--info);">24.1°C</span>
+                                <span class="sensor-value">24.1°C</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-cloud-fog2" style="color: var(--warning);"></i>
+                                    <i class="bi bi-cloud-fog2 text-secondary"></i>
                                     CO2
                                 </span>
-                                <span class="sensor-value" style="color: var(--warning);">450 ppm</span>
+                                <span class="sensor-value">450 ppm</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-wind" style="color: var(--danger);"></i>
+                                    <i class="bi bi-wind text-success"></i>
                                     Qualidade do Ar
                                 </span>
-                                <span class="sensor-value" style="color: var(--warning);">Moderada</span>
+                                <span class="sensor-value">Moderada</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-volume-up" style="color: var(--danger);"></i>
+                                    <i class="bi bi-volume-up text-dark"></i>
                                     Ruído
                                 </span>
-                                <span class="sensor-value" style="color: var(--danger);">78 dB</span>
+                                <span class="sensor-value">78 dB</span>
                             </div>
 
                             <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-fan"></i>
+                                    <i class="bi bi-fan text-primary"></i>
                                     Sistema de Ventilação
                                 </span>
                                 <button class="actuator-btn active" onclick="toggleActuator(this)">
-                                    <i class="bi bi-toggle-on"></i> Ativo
+                                    <i class="bi bi-toggle-on"></i> Desligado
                                 </button>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <i class="bi bi-exclamation-triangle text-warning"></i>
                                     Alertas de Poluição
                                 </span>
                                 <button class="actuator-btn active" onclick="toggleActuator(this)">
-                                    <i class="bi bi-toggle-on"></i> Ativo
+                                    <i class="bi bi-toggle-on"></i> Desligado
                                 </button>
                             </div>
                         </div>
@@ -603,38 +648,38 @@
                             <h6 class="mb-3"><i class="bi bi-speedometer"></i> Sensores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-thermometer" style="color: var(--info);"></i>
+                                    <i class="bi bi-thermometer text-danger"></i>
                                     Temperatura
                                 </span>
-                                <span class="sensor-value" style="color: var(--info);">22.0°C</span>
+                                <span class="sensor-value">22.0°C</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-droplet" style="color: var(--primary);"></i>
+                                    <i class="bi bi-droplet text-info"></i>
                                     Humidade
                                 </span>
-                                <span class="sensor-value" style="color: var(--primary);">65%</span>
+                                <span class="sensor-value">65%</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-brightness-high" style="color: var(--warning);"></i>
+                                    <i class="bi bi-brightness-high text-warning"></i>
                                     Luminosidade
                                 </span>
-                                <span class="sensor-value" style="color: var(--warning);">180 lux</span>
+                                <span class="sensor-value">180 lux</span>
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-wind" style="color: var(--success);"></i>
-                                    Qualidade do Ar
+                                    <i class="bi bi-wind text-danger"></i>
+                                    Ruído
                                 </span>
-                                <span class="sensor-value" style="color: var(--success);">Boa</span>
+                                <span class="sensor-value">80 dB</span>
                             </div>
 
                             <h6 class="mt-4 mb-3"><i class="bi bi-lightning"></i> Atuadores</h6>
                             <div class="sensor-item">
                                 <span class="sensor-name">
                                     <i class="bi bi-lightbulb-fill"></i>
-                                    Iluminação de Rua
+                                    Iluminação Pública
                                 </span>
                                 <button class="actuator-btn active" onclick="toggleActuator(this)">
                                     <i class="bi bi-toggle-on"></i> Ligado
@@ -642,11 +687,11 @@
                             </div>
                             <div class="sensor-item">
                                 <span class="sensor-name">
-                                    <i class="bi bi-stoplights"></i>
-                                    Controlo de Tráfego
+                                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                                    Alertas de Poluição Sonora
                                 </span>
-                                <button class="actuator-btn active" onclick="toggleActuator(this)">
-                                    <i class="bi bi-toggle-on"></i> Normal
+                                <button class="actuator-btn inactive" onclick="toggleActuator(this)">
+                                    <i class="bi bi-toggle-off"></i> Desligado
                                 </button>
                             </div>
                         </div>
@@ -695,11 +740,25 @@
                         <div class="col-md-6">
                             <div class="glass-card" style="background: rgba(237, 137, 54, 0.1);">
                                 <h5><i class="bi bi-exclamation-triangle"></i> Alerta de Qualidade do Ar</h5>
-                                <p class="text-muted mb-3">Gerar alerta quando qualidade do ar é má</p>
+                                <p class="text-muted mb-3">Escolher nível mínimo para ativar o alerta</p>
                                 <div class="mb-3">
-                                    <label class="form-label">AQI Máximo</label>
-                                    <input type="range" class="form-range" min="0" max="500" value="150">
-                                    <span class="badge-custom bg-warning">150</span>
+                                    <label class="form-label">Nível Mínimo de Alerta</label>
+                                    <div class="mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="airQualityLevel" id="airModerate" value="moderada" checked>
+                                            <label class="form-check-label" for="airModerate">
+                                                <span class="badge-custom bg-warning">Moderada</span>
+                                                <small class="text-muted ms-2">Alerta em: Moderada e Má</small>
+                                            </label>
+                                        </div>
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="radio" name="airQualityLevel" id="airBad" value="má">
+                                            <label class="form-check-label" for="airBad">
+                                                <span class="badge-custom bg-danger">Má</span>
+                                                <small class="text-muted ms-2">Alerta apenas em: Má</small>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="rule3" checked>
@@ -710,12 +769,12 @@
 
                         <div class="col-md-6">
                             <div class="glass-card" style="background: rgba(245, 101, 101, 0.1);">
-                                <h5><i class="bi bi-volume-up-fill"></i> Controlo de Ruído</h5>
-                                <p class="text-muted mb-3">Ajustar semáforos quando ruído é elevado</p>
+                                <h5><i class="bi bi-volume-up-fill"></i> Alerta de Poluição Sonora</h5>
+                                <p class="text-muted mb-3">Ativar alertas quando o ruído ultrapassa o limite</p>
                                 <div class="mb-3">
                                     <label class="form-label">Nível Máximo de Ruído (dB)</label>
-                                    <input type="range" class="form-range" min="0" max="120" value="80">
-                                    <span class="badge-custom bg-danger">80 dB</span>
+                                    <input type="range" class="form-range" min="0" max="120" value="75">
+                                    <span class="badge-custom bg-danger">75 dB</span>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="rule4">
@@ -770,8 +829,9 @@
                                 <option>Iluminação Pública</option>
                                 <option>Sistema de Rega</option>
                                 <option>Câmaras de Segurança</option>
-                                <option>Ventilação</option>
-                                <option>Sistema de Alerta</option>
+                                <option>Sistema de Ventilação</option>
+                                <option>Alertas de Poluição</option>
+                                <option>Alertas de Poluição Sonora</option>
                             </select>
                             <button class="btn btn-success w-100" id="addActuatorBtn">
                                 <i class="bi bi-plus-circle"></i> Adicionar Atuador
