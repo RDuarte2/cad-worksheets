@@ -790,9 +790,7 @@ var app = (function () {
                 $('#avgHumidity').text(avgHumidity + '%');
             }
         }
-        
-        // Calculate active lights based on lighting actuators
-        updateActiveLights();
+
     }
     
     // Update active lights count based on public lighting actuators
@@ -1400,12 +1398,35 @@ var app = (function () {
             });
     }
 
+    function fetchSunriseSunsetData() {
+        var apiUrl = 'https://api.sunrisesunset.io/json?lat=39.74362&lng=-8.80705&timezone=UTC&date=today';
+
+        $.ajax({
+            url: apiUrl,
+            dataType: 'json'
+        })
+            .done(function (data) {
+                if (data.status === 'OK') {
+                    // Update sunrise and sunset times
+                    $('#sunriseTime').text(data.results.sunrise);
+                    $('#sunsetTime').text(data.results.sunset);
+                }
+            })
+            .fail(function (jqXHR, textStatus, error) {
+                console.error('Error fetching sunrise/sunset data:', error);
+            });
+    }
+
     $(document).ready(function () {
         // Auto-update every 1 minute (60000 ms)
         weatherUpdateInterval = setInterval(fetchWeatherData, 60000);
 
         // Initial fetch on page load
         fetchWeatherData();
+        fetchSunriseSunsetData();
+        
+        // Update sunrise/sunset data every hour (3600000 ms)
+        setInterval(fetchSunriseSunsetData, 3600000);
     });
 
     // Expose functions globally

@@ -389,7 +389,7 @@
                 <!-- Header -->
                 <div class="header">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <h1 class="city-title">
                                 <i class="bi bi-buildings"></i> Smart City Leiria
                             </h1>
@@ -398,8 +398,20 @@
                                 <span id="systemStatus">Sistema Operacional</span> | Última atualização: <span id="lastUpdate">--:--</span>
                             </p>
                         </div>
-                        <div class="col-md-4">
-                            <div class="weather-widget">
+                        <div class="col-md-3">
+                            <div class="weather-widget" style="background: linear-gradient(135deg, #f6d365, #fda085); display: flex; flex-direction: column; justify-content: center; min-height: 180px;">
+                                <div style="font-size: 2.5rem; margin-bottom: 5px;">
+                                    <i class="bi bi-sunrise"></i>
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 600;" id="sunriseTime">--:--</div>
+                                <div style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 5px;">
+                                    <i class="bi bi-sunset"></i>
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 600;" id="sunsetTime">--:--</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="weather-widget" style="min-height: 180px;">
                                 <div class="weather-icon"></div>
                                 <div class="weather-temp" id="curTemperature"></div>
                                 <div id="weatherDescription"></div>
