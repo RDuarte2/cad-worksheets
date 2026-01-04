@@ -27,9 +27,14 @@ var app = (function () {
 
     // Generate descriptive ID from name and zone
     function generateDeviceId(name, zone) {
-        // Remove only special characters (not letters with accents) and spaces
-        const cleanName = name.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '').replace(/\s+/g, '');
-        const cleanZone = zone.replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, '').replace(/\s+/g, '');
+        // Function to remove accents from text
+        const removeAccents = (str) => {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        };
+        
+        // Remove accents, special characters and spaces
+        const cleanName = removeAccents(name).replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '');
+        const cleanZone = removeAccents(zone).replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '');
         return `${cleanName}_${cleanZone}`;
     }
 
@@ -112,6 +117,10 @@ var app = (function () {
                 // Load sensors
                 if (firebaseDevices.sensors) {
                     Object.values(firebaseDevices.sensors).forEach(sensor => {
+                        // Initialize sensorStatus if not present
+                        if (sensor.sensorStatus === undefined) {
+                            sensor.sensorStatus = 1; // Default to online
+                        }
                         addSensorToDOM(sensor);
                         devices.sensors.push(sensor);
                     });
@@ -177,25 +186,53 @@ var app = (function () {
                     const sensor = firebaseSensors[sensorKey];
                     
                     // Use the key as ID if sensor.id doesn't exist
-                    const sensorId = sensor.id || sensorKey;
-                    
-                    // console.log(`Atualizando sensor ${sensorId}:`, sensor.value);
+                    let sensorId = sensor.id || sensorKey;
                     
                     // Find sensor in DOM and update value
-                    const $sensorElement = $(`.sensor-item[data-device-id="${sensorId}"]`);
+                    let $sensorElement = $(`.sensor-item[data-device-id="${sensorId}"]`);
+                    
+                    // If not found, try with the key directly (in case ID has different format)
+                    if (!$sensorElement.length && sensorKey !== sensorId) {
+                        $sensorElement = $(`.sensor-item[data-device-id="${sensorKey}"]`);
+                        if ($sensorElement.length) {
+                            sensorId = sensorKey; // Use the key that worked
+                        }
+                    }
+                    
                     if ($sensorElement.length) {
                         if (sensor.value) {
                             $sensorElement.find('.sensor-value').text(sensor.value);
-                            // console.log(`Valor atualizado para ${sensorId}: ${sensor.value}`);
                         }
                         
                         // Update in devices array
                         const localSensor = devices.sensors.find(s => s.id === sensorId);
-                        if (localSensor && sensor.value) {
-                            localSensor.value = sensor.value;
+                        if (localSensor) {
+                            if (sensor.value) {
+                                localSensor.value = sensor.value;
+                            }
+                            
+                            // Update sensor status if available
+                            if (sensor.sensorStatus !== undefined) {
+                                localSensor.sensorStatus = sensor.sensorStatus;
+                                
+                                // Update status in device table
+                                const $row = $(`#deviceTableBody tr[data-device-id="${sensorId}"][data-device-type="sensor"]`);
+                                if ($row.length) {
+                                    const statusText = sensor.sensorStatus === 1 ? 'Online' : 'Offline';
+                                    const statusClass = sensor.sensorStatus === 1 ? 'status-online' : 'status-offline';
+                                    $row.find('td:eq(3)').html(
+                                        `<span class="status-indicator ${statusClass}"></span> ${statusText}`
+                                    );
+                                }
+                                
+                                // Update active devices count
+                                updateActiveDevicesCount();
+                            }
                             
                             // Check automation rules when sensor value changes
-                            checkAutomationRules(localSensor);
+                            if (sensor.value) {
+                                checkAutomationRules(localSensor);
+                            }
                             
                             // Update average values in cards
                             updateAverageValues();
@@ -316,21 +353,26 @@ var app = (function () {
                     systemOnline = (status.online === 1);
                     
                     // Update active devices count based on system status
-                    if (systemOnline) {
-                        $('#activeSensors').text(devices.sensors.length + devices.actuators.length);
-                    } else {
-                        $('#activeSensors').text('0');
-                    }
+                    updateActiveDevicesCount();
                     
-                    // Update sensor status in device table
+                    // Update sensor status in device table based on system status
                     devices.sensors.forEach(sensor => {
                         const $row = $(`#deviceTableBody tr[data-device-id="${sensor.id}"][data-device-type="sensor"]`);
                         if ($row.length) {
-                            const statusText = systemOnline ? 'Online' : 'Offline';
-                            const statusClass = systemOnline ? 'status-online' : 'status-offline';
-                            $row.find('td:eq(3)').html(
-                                `<span class="status-indicator ${statusClass}"></span> ${statusText}`
-                            );
+                            if (!systemOnline) {
+                                // When system is offline, all sensors show offline
+                                $row.find('td:eq(3)').html(
+                                    `<span class="status-indicator status-offline"></span> Offline`
+                                );
+                            } else {
+                                // When system is online, use individual sensor status
+                                const isOnline = sensor.sensorStatus !== undefined ? sensor.sensorStatus === 1 : true;
+                                const statusText = isOnline ? 'Online' : 'Offline';
+                                const statusClass = isOnline ? 'status-online' : 'status-offline';
+                                $row.find('td:eq(3)').html(
+                                    `<span class="status-indicator ${statusClass}"></span> ${statusText}`
+                                );
+                            }
                         }
                     });
                     
@@ -385,6 +427,9 @@ var app = (function () {
             // Add type-specific fields
             if (deviceType === 'sensors') {
                 deviceData.value = device.value;
+                if (device.sensorStatus !== undefined) {
+                    deviceData.sensorStatus = device.sensorStatus;
+                }
             } else {
                 deviceData.status = device.status;
             }
@@ -747,6 +792,18 @@ var app = (function () {
     // Update the device count
     function updateSensorCount() {
         $('#activeSensors').text(devices.sensors.length + devices.actuators.length);
+    }
+    
+    // Update active devices count (only online sensors + actuators)
+    function updateActiveDevicesCount() {
+        if (!systemOnline) {
+            $('#activeSensors').text('0');
+        } else {
+            // Count only online sensors
+            const onlineSensors = devices.sensors.filter(s => s.sensorStatus === 1).length;
+            const totalActive = onlineSensors + devices.actuators.length;
+            $('#activeSensors').text(totalActive);
+        }
     }
     
     // Update average temperature and humidity cards
@@ -1274,8 +1331,10 @@ var app = (function () {
 
         // Add sensors
         devices.sensors.forEach(function (sensor) {
-            const sensorStatusText = systemOnline ? 'Online' : 'Offline';
-            const sensorStatusClass = systemOnline ? 'status-online' : 'status-offline';
+            // Use individual sensor status if available, otherwise use system status
+            const isOnline = sensor.sensorStatus !== undefined ? sensor.sensorStatus === 1 : systemOnline;
+            const sensorStatusText = isOnline ? 'Online' : 'Offline';
+            const sensorStatusClass = isOnline ? 'status-online' : 'status-offline';
             const row = `
                 <tr data-device-id="${sensor.id}" data-device-type="sensor">
                     <td>${sensor.zone}</td>
